@@ -1,0 +1,32 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-deploy:    # ← Ein Job für alles!
+    runs-on: ubuntu-latest
+    
+    steps:
+    # TEIL 1: Bauen
+    - name: Checkout Code
+      # ... Code herunterladen
+    
+    - name: Build Frontend
+      # ... Frontend-Image bauen
+    
+    - name: Build Backend
+      # ... Backend-Image bauen
+    
+    - name: Push to Docker Hub
+      # ... Images hochladen
+    
+    # TEIL 2: Deployment
+    - name: Deploy to Server
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        # ... SSH-Verbindung zum Server
+        script: |
+          docker compose pull  # Images herunterladen
+          docker compose up -d  # Container starten
