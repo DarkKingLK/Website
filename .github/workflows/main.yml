@@ -1,32 +1,40 @@
-name: Build and Deploy
+name: Deploy to Debian VM
 
 on:
   push:
     branches: [ main ]
 
 jobs:
-  build-and-deploy:    # ← Ein Job für alles!
+  deploy:
     runs-on: ubuntu-latest
     
     steps:
-    # TEIL 1: Bauen
-    - name: Checkout Code
-      # ... Code herunterladen
+    # 1. Code herunterladen
+    - name: Checkout Repository
+      uses: actions/checkout@v4
     
-    - name: Build Frontend
-      # ... Frontend-Image bauen
-    
-    - name: Build Backend
-      # ... Backend-Image bauen
-    
-    - name: Push to Docker Hub
-      # ... Images hochladen
-    
-    # TEIL 2: Deployment
-    - name: Deploy to Server
+    # 2. Deployment auf deine Debian VM
+    - name: Deploy to VM (172.20.20.137)
       uses: appleboy/ssh-action@v1.0.0
       with:
-        # ... SSH-Verbindung zum Server
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        port: 22
         script: |
-          docker compose pull  # Images herunterladen
-          docker compose up -d  # Container starten
+          # Ins Projektverzeichnis wechseln
+          cd ~/Projekte/Website/Website
+          
+          # Neuesten Code von GitHub holen
+          git pull origin main
+          
+          # Alte Container stoppen
+          sudo docker compose down
+          
+          # Neue Container bauen und starten
+          sudo docker compose up -d --build
+          
+          # Status anzeigen
+          sudo docker compose ps
+          
+          echo "✅ Deployment erfolgreich auf VM 172.20.20.137!"
