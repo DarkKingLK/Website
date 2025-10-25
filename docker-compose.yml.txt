@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  # MongoDB Datenbank
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: deinPasswort123
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - app-network
+
+  # Backend Service (Node.js Beispiel)
+  backend:
+    build: ./backend
+    container_name: backend
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      MONGODB_URI: mongodb://admin:deinPasswort123@mongodb:27017/
+      NODE_ENV: production
+    depends_on:
+      - mongodb
+    networks:
+      - app-network
+
+  # Frontend Service
+  frontend:
+    build: ./frontend
+    container_name: frontend
+    restart: always
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+  # Mongo Express (Web-Interface für MongoDB - optional aber sehr hilfreich!)
+  mongo-express:
+    image: mongo-express:latest
+    container_name: mongo-express
+    restart: always
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: admin
+      ME_CONFIG_MONGODB_ADMINPASSWORD: deinPasswort123
+      ME_CONFIG_MONGODB_URL: mongodb://admin:deinPasswort123@mongodb:27017/
+    depends_on:
+      - mongodb
+    networks:
+      - app-network
+
+volumes:
+  mongodb_data:
+
+networks:
+  app-network:
+    driver: bridge
